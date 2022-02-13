@@ -3,6 +3,9 @@ import openfl.net.NetConnection;
 import openfl.net.NetStream;
 import openfl.events.NetStatusEvent;
 import openfl.media.Video;
+#elseif android
+import extension.webview.WebView;
+import android.*;
 #else
 import openfl.events.Event;
 import vlc.VlcBitmap;
@@ -45,6 +48,11 @@ class FlxVideo extends FlxBasic {
 			}
 		});
 		netStream.play(name);
+		#elseif android
+
+		WebView.onClose=onClose;
+		WebView.onURLChanging=onURLChanging;
+		WebView.open(AndroidTools.getFileUrl(name), false, null, ['http://exitme(.*)']);
 
 		#elseif desktop
 		// by Polybius, check out PolyEngine! https://github.com/polybiusproxy/PolyEngine
@@ -119,7 +127,6 @@ class FlxVideo extends FlxBasic {
 			finishCallback();
 		}
 	}
-
 	
 	function onVLCError()
 		{
@@ -128,6 +135,17 @@ class FlxVideo extends FlxBasic {
 				finishCallback();
 			}
 		}
+	#elseif android
+	function onClose() {
+		if (finishCallback != null){
+			finishCallback();
+		}
+	 }
+
+	function onURLChanging(url:String){
+		if (url == 'http://exitme/') 
+            onClose();
+	}
 	#end
 	#end
 }
